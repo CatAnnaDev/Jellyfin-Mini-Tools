@@ -1,0 +1,16 @@
+[package]
+name = "jellyfind"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+actix-web = { version = "4.10.2", features = ["rustls-0_20"] }
+actix-cors = "0.7.1"
+reqwest = { version = "0.12.15", features = ["cookies", "multipart", "stream"] }
+scraper = "0.23.1"
+serde = {version = "1.0.219", features = ["derive"]}
+tokio = {version = "1.44.2", features = ["full"]}
+rustls = "0.20.9"
+rustls-pemfile = "1.0"
+anyhow = "1.0.98"
+serde_json = "1.0.140"

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <title>Recherche de Films</title>
+</head>
+<body>
+<div id="TemplateConfigPage"
+     data-role="page"
+     class="page type-interior pluginConfigurationPage"
+     data-require="emby-input,emby-button,emby-select,emby-checkbox">
+
+    <div data-role="content">
+        <div class="content-primary">
+            <form id="TemplateConfigForm">
+                <div class="inputContainer">
+                    <label class="inputLabel inputLabelUnfocused" for="AString">Nom du film</label>
+                    <input id="AString" name="AString" type="text" is="emby-input" />
+
+                    <div style="margin-top: 10px;">
+                        <button is="emby-button" type="submit" class="raised button-submit block emby-button">
+                            <span>🔍 Rechercher</span>
+                        </button>
+                        <button type="button" is="emby-button" class="raised emby-button" onclick="clearResults()" style="margin-left: 10px;">
+                            <span>🧹 Nettoyer</span>
+                        </button>
+                    </div>
+                </div>
+                <div id="results" style="margin-top: 20px;"></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("TemplateConfigForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+            doSearch();
+        });
+
+        async function doSearch() {
+            const query = encodeURIComponent(document.getElementById('AString').value.trim());
+            if (!query) return;
+
+            const url = `https://127.0.0.1:8080/search?q=` + query;
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Erreur HTTP ${response.status}`);
+                const data = await response.json();
+
+                const container = document.getElementById('results');
+                container.innerHTML = '';
+
+                data.forEach(item => {
+                    const card = document.createElement('div');
+                    card.style.border = '1px solid #ccc';
+                    card.style.padding = '10px';
+                    card.style.marginBottom = '10px';
+                    card.style.borderRadius = '5px';
+                    card.style.backgroundColor = '#f9f9f9';
+
+                    const title = item.title;
+                    const size = item.size;
+                    const seeder = item.seeders;
+                    const peers = item.peers;
+                    const meow = item.url;
+
+                    card.innerHTML = `
+                            <h3>${title}</h3>
+                            <p><strong>Taille :</strong> ${size} Mo</p>
+                            <p><strong>Seeders :</strong> ${seeder} | <strong>Peers :</strong> ${peers}</p>
+                            <a>
+                                <buttton onclick='getResults("https://127.0.0.1:8080/dl?dl=${meow}")'>Télécharger</button>
+                            </a>
+                        `;
+
+                    container.appendChild(card);
+                });
+
+            } catch (err) {
+                console.error('Erreur de recherche :', err);
+                alert("Échec de la recherche. Vérifie que le backend est lancé.");
+            }
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        async function getResults(url) {
+            try {
+                const response = await fetch(url);
+                console.log(response);
+            }catch(err) {
+                console.error('Erreur lors du téléchargement :', err);
+            }
+        }
+
+    </script>
+</div>
+</body>
+</html>

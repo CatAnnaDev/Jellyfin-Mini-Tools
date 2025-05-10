@@ -1,6 +1,8 @@
 mod api;
 mod search;
 mod download;
+mod search_ygg;
+mod models;
 
 use rustls::{Certificate, PrivateKey, ServerConfig};
 use std::fs::File;

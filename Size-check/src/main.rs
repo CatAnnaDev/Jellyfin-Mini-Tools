@@ -1,5 +1,6 @@
 use std::{fs::{self, File}, io::{self, Write}, path::{Path, PathBuf}};
 use clap::{Parser, ArgAction};
+use eframe::egui;
 use serde::Serialize;
 use indicatif::{ProgressBar, ProgressStyle};
 
@@ -26,6 +27,9 @@ struct ClapArgs {
 
     #[arg(long, help = "Simulate the run without writing any file", action = ArgAction::SetTrue)]
     dry_run: bool,
+
+    #[arg(long, help = "Show result in ui", action = ArgAction::SetTrue)]
+    ui: bool,
 
 }
 
@@ -224,10 +228,17 @@ fn main() {
         _ => "txt",
     });
 
+
     match visit_dirs(&base_path, args.debug, args.include_all, &mut summary,  &pb) {
         Ok(mut folder_structure) => {
             pb.finish_with_message("Analyse terminée.");
             sort_folder(&mut folder_structure, &args.sort);
+
+
+            if args.ui {
+                show_ui(folder_structure); // Appelle l'interface graphique
+                return;
+            }
 
             if args.dry_run {
                 println!("Dry-run mode: no output file written.");
@@ -271,5 +282,51 @@ fn main() {
         Err(e) => {
             eprintln!("Error: {}", e);
         }
+    }
+}
+
+fn show_ui(json_data: FolderNode) {
+    let _ = eframe::run_native(
+        "Résultat Analyse Dossier",
+        eframe::NativeOptions::default(),
+        Box::new(|_cc| Ok(Box::new(JsonViewerApp { root_folder: json_data }))),
+    );
+}
+
+struct JsonViewerApp {
+    root_folder: FolderNode,
+}
+
+impl JsonViewerApp {
+    fn display_folder_tree(&self, ui: &mut egui::Ui, folder: &FolderNode) {
+        ui.collapsing(&folder.name, |ui| {
+            ui.horizontal(|ui| {
+                ui.label(format!("Taille: {}", format_size(folder.size, 2,  SizeUnit::Decimal, None)));
+            });
+
+            for file in &folder.files {
+                ui.horizontal(|ui| {
+                    ui.label(format!("Fichier: {}", file.name));
+                    ui.label(format!("Taille: {}", format_size(file.size, 2,  SizeUnit::Decimal, None)));
+                });
+            }
+
+            for subfolder in &folder.subfolders {
+                self.display_folder_tree(ui, subfolder);
+            }
+        });
+    }
+}
+
+impl eframe::App for JsonViewerApp {
+    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        egui::CentralPanel::default().show(ctx, |ui| {
+            ui.label("Arborescence des Dossiers :");
+            egui::ScrollArea::vertical().show(ui, |ui| {
+                ui.allocate_space(egui::vec2(ui.available_width(), 0.0));
+
+                self.display_folder_tree(ui, &self.root_folder);
+            });
+        });
     }
 }

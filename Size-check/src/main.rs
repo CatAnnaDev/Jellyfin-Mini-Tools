@@ -1,6 +1,7 @@
 use std::{fs::{self, File}, io::{self, Write}, path::{Path, PathBuf}};
 use clap::{Parser, ArgAction};
 use eframe::egui;
+use eframe::egui::Id;
 use serde::Serialize;
 use indicatif::{ProgressBar, ProgressStyle};
 
@@ -40,14 +41,16 @@ struct Summary {
     total_size: u64,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 struct FileNode {
+    path: String,
     name: String,
     size: u64,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 struct FolderNode {
+    path: String,
     name: String,
     size: u64,
     files: Vec<FileNode>,
@@ -79,9 +82,16 @@ fn count_entries(dir: &Path, include_all: bool) -> u64 {
     count
 }
 
-fn visit_dirs(dir: &Path, debug: bool, include_all: bool, summary: &mut Summary, pb: &ProgressBar) -> io::Result<FolderNode> {
+fn visit_dirs(
+    dir: &Path,
+    debug: bool,
+    include_all: bool,
+    summary: &mut Summary,
+    pb: &ProgressBar,
+) -> io::Result<FolderNode> {
     summary.total_folders += 1;
     let mut folder = FolderNode {
+        path: dir.display().to_string(),
         name: dir.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_else(|| dir.display().to_string()),
         size: 0,
         files: vec![],
@@ -104,9 +114,10 @@ fn visit_dirs(dir: &Path, debug: bool, include_all: bool, summary: &mut Summary,
             }
 
             pb.inc(1);
-            
+
             match visit_dirs(&path, debug, include_all, summary, pb) {
                 Ok(subfolder) => {
+                    folder.path = path.display().to_string();
                     folder.size += subfolder.size;
                     folder.subfolders.push(subfolder);
                 }
@@ -130,7 +141,7 @@ fn visit_dirs(dir: &Path, debug: bool, include_all: bool, summary: &mut Summary,
                 Ok(metadata) => {
                     let size = metadata.len();
                     folder.size += size;
-                    folder.files.push(FileNode { name: file_name, size });
+                    folder.files.push(FileNode { path: path.display().to_string(), name: file_name, size });
                     summary.total_files += 1;
                     summary.total_size += size;
                 }
@@ -293,26 +304,60 @@ fn show_ui(json_data: FolderNode) {
     );
 }
 
+#[derive(Debug, Clone)]
 struct JsonViewerApp {
     root_folder: FolderNode,
 }
 
 impl JsonViewerApp {
-    fn display_folder_tree(&self, ui: &mut egui::Ui, folder: &FolderNode) {
-        ui.collapsing(&folder.name, |ui| {
-            ui.horizontal(|ui| {
-                ui.label(format!("Taille: {}", format_size(folder.size, 2,  SizeUnit::Decimal, None)));
-            });
+    fn display_folder_tree(&mut self, ui: &mut egui::Ui, folder: &FolderNode) {
+        let folder_label = format!("{} ({})", &folder.name, format_size(folder.size, 2, SizeUnit::Decimal, None));
+        let response = ui.collapsing(folder_label, |ui| {
 
             for file in &folder.files {
-                ui.horizontal(|ui| {
-                    ui.label(format!("Fichier: {}", file.name));
-                    ui.label(format!("Taille: {}", format_size(file.size, 2,  SizeUnit::Decimal, None)));
+                let file_label = format!("{} ({})", file.name, format_size(file.size, 2, SizeUnit::Decimal, None));
+                let response = ui.add(egui::Label::new(file_label).sense(egui::Sense::click()));
+
+                if response.secondary_clicked() {
+                    ui.ctx().memory_mut(|mem| {
+                        mem.open_popup(Id::new(format!("popup_{}", file.name)));
+                    });
+                }
+                
+                let close_on_click_outside = egui::popup::PopupCloseBehavior::CloseOnClickOutside;
+                egui::popup::popup_below_widget(ui, Id::new(format!("popup_{}", file.name)), &response, close_on_click_outside, |ui| {
+                    if ui.button("Open file").clicked() {
+                        open_file_or_folder(&file.path);
+                        ui.close_menu();
+                    }
+                    if ui.button("Delete file").clicked() {
+                        delete_file_or_folder(&file.path);
+                        ui.close_menu();
+                    }
                 });
+            
             }
 
             for subfolder in &folder.subfolders {
                 self.display_folder_tree(ui, subfolder);
+            }
+        });
+
+        if response.header_response.secondary_clicked() {
+            ui.ctx().memory_mut(|mem| {
+                mem.open_popup(Id::new(format!("popup_{}", folder.name)));
+            });
+        }
+
+        let close_on_click_outside = egui::popup::PopupCloseBehavior::CloseOnClickOutside;
+        egui::popup::popup_below_widget(ui, Id::new(format!("popup_{}", folder.name)), &response.header_response, close_on_click_outside, |ui| {
+            if ui.button("Open Folder").clicked() {
+                open_file_or_folder(&folder.path);
+                ui.close_menu();
+            }
+            if ui.button("Delete Folder").clicked() {
+                delete_file_or_folder(&folder.path);
+                ui.close_menu();
             }
         });
     }
@@ -324,9 +369,49 @@ impl eframe::App for JsonViewerApp {
             ui.label("Arborescence des Dossiers :");
             egui::ScrollArea::vertical().show(ui, |ui| {
                 ui.allocate_space(egui::vec2(ui.available_width(), 0.0));
-
-                self.display_folder_tree(ui, &self.root_folder);
+                let folder = self.root_folder.clone();
+                self.display_folder_tree(ui, &folder);
             });
         });
+    }
+}
+
+use std::process::Command;
+
+fn open_file_or_folder(file_path: &str) {
+    #[cfg(target_os = "macos")]
+    {
+        Command::new("open")
+            .arg(file_path)
+            .spawn()
+            .expect("Failed to open the file or folder");
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        Command::new("xdg-open")
+            .arg(file_path)
+            .spawn()
+            .expect("Failed to open the file or folder");
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        Command::new("explorer")
+            .arg(file_path)
+            .spawn()
+            .expect("Failed to open the file or folder");
+    }
+}
+
+fn delete_file_or_folder(file_path: &str) {
+    if fs::remove_file(file_path).is_err() {
+        if let Err(e) = fs::remove_dir_all(file_path) {
+            println!("Failed to delete the file or folder: {}", e);
+        }else { 
+            println!("Successfully delete the file or folder");
+        }
+    } else {
+        println!("File deleted: {}", file_path);
     }
 }

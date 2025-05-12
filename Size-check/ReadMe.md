@@ -20,11 +20,14 @@ Assurez-vous d’avoir [Rust](https://www.rust-lang.org/tools/install) installé
 git clone https://github.com/CatAnnaDev/Jellyfin-Mini-Tools.git
 cd Jellyfin-Mini-Tools/Size-Check
 cargo build --release
-
+```
 ## 🧪 Utilisation
 
 cargo run --release -- [OPTIONS]
 
+## ⚙️ Options disponibles
+
+```text
 Option	Description
 -p, --path	Dossier de base à analyser (défaut: /Volumes/3To)
 -o, --output	Nom du fichier de sortie (défaut: output.txt)
@@ -36,7 +39,7 @@ Option	Description
 --ui	Affiche les résultats dans une interface graphique
 --help	Affiche l’aide
 --version	Affiche la version
-
+```
 ## 📦 Exemple d'utilisation
 
 # Analyse le dossier /Volumes/3To et exporte en JSON

@@ -108,8 +108,8 @@ pub fn build_headers() -> HeaderMap {
 
 async fn perform_login(client: &Client, cookie_store: Arc<Jar>) -> Result<(), reqwest::Error> {
     let login_form = Form::new()
-        .text("id", "Psyko71")
-        .text("pass", "Asterix1928.");
+        .text("id", "")
+        .text("pass", "");
 
     let response = client
         .post("https://www.yggtorrent.top/auth/process_login")

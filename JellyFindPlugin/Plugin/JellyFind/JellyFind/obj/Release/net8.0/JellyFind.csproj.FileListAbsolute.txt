@@ -1,0 +1,12 @@
+/Users/anna/RiderProjects/JellyFind/JellyFind/bin/Release/net8.0/JellyFind.deps.json
+/Users/anna/RiderProjects/JellyFind/JellyFind/bin/Release/net8.0/JellyFind.dll
+/Users/anna/RiderProjects/JellyFind/JellyFind/bin/Release/net8.0/JellyFind.pdb
+/Users/anna/RiderProjects/JellyFind/JellyFind/obj/Release/net8.0/JellyFind.csproj.AssemblyReference.cache
+/Users/anna/RiderProjects/JellyFind/JellyFind/obj/Release/net8.0/JellyFind.GeneratedMSBuildEditorConfig.editorconfig
+/Users/anna/RiderProjects/JellyFind/JellyFind/obj/Release/net8.0/JellyFind.AssemblyInfoInputs.cache
+/Users/anna/RiderProjects/JellyFind/JellyFind/obj/Release/net8.0/JellyFind.AssemblyInfo.cs
+/Users/anna/RiderProjects/JellyFind/JellyFind/obj/Release/net8.0/JellyFind.csproj.CoreCompileInputs.cache
+/Users/anna/RiderProjects/JellyFind/JellyFind/obj/Release/net8.0/JellyFind.dll
+/Users/anna/RiderProjects/JellyFind/JellyFind/obj/Release/net8.0/refint/JellyFind.dll
+/Users/anna/RiderProjects/JellyFind/JellyFind/obj/Release/net8.0/JellyFind.pdb
+/Users/anna/RiderProjects/JellyFind/JellyFind/obj/Release/net8.0/ref/JellyFind.dll

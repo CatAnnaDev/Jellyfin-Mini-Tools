@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>JellyFind</name>
+    </assembly>
+    <members>
+        <member name="T:JellyFind.Configuration.PluginConfiguration">
+            <summary>
+            Plugin configuration.
+            </summary>
+        </member>
+        <member name="M:JellyFind.Configuration.PluginConfiguration.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:JellyFind.Configuration.PluginConfiguration"/> class.
+            </summary>
+        </member>
+        <member name="P:JellyFind.Configuration.PluginConfiguration.AString">
+            <summary>
+            Gets or sets a string setting.
+            </summary>
+        </member>
+        <member name="T:JellyFind.Plugin">
+            <summary>
+            The main plugin.
+            </summary>
+        </member>
+        <member name="M:JellyFind.Plugin.#ctor(MediaBrowser.Common.Configuration.IApplicationPaths,MediaBrowser.Model.Serialization.IXmlSerializer)">
+            <summary>
+            Initializes a new instance of the <see cref="T:JellyFind.Plugin"/> class.
+            </summary>
+            <param name="applicationPaths">Instance of the <see cref="T:MediaBrowser.Common.Configuration.IApplicationPaths"/> interface.</param>
+            <param name="xmlSerializer">Instance of the <see cref="T:MediaBrowser.Model.Serialization.IXmlSerializer"/> interface.</param>
+        </member>
+        <member name="P:JellyFind.Plugin.Name">
+            <inheritdoc />
+        </member>
+        <member name="P:JellyFind.Plugin.Description">
+            <inheritdoc />
+        </member>
+        <member name="P:JellyFind.Plugin.Id">
+            <inheritdoc />
+        </member>
+        <member name="P:JellyFind.Plugin.Instance">
+            <summary>
+            Gets the current plugin instance.
+            </summary>
+        </member>
+        <member name="M:JellyFind.Plugin.GetPages">
+            <inheritdoc />
+        </member>
+    </members>
+</doc>

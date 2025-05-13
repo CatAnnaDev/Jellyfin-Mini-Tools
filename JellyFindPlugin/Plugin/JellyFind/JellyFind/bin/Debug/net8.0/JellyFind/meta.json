@@ -1,0 +1,16 @@
+{
+  "category": "Torrent",
+  "changelog": "- Fallback on empty ParentIndexNumber (#75) @Shadowghost",
+  "description": "JellyFind torrent provider\n",
+  "guid": "a2b2a7ed-aa28-4521-a64a-63d86901f246",
+  "name": "JellyFind",
+  "overview": "JellyFind torrent provider",
+  "owner": "jellyfin",
+  "targetAbi": "10.10.6.0",
+  "timestamp": "2025-02-25T03:40:44.0000000Z",
+  "version": "10.0.0.0",
+  "status": "Active",
+  "autoUpdate": true,
+  "imagePath": "",
+  "assemblies": []
+}

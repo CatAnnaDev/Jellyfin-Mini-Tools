@@ -10,7 +10,7 @@ namespace JellyFind;
 /// <summary>
 /// The main plugin.
 /// </summary>
-public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IPlugin
+public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="Plugin"/> class.
@@ -40,11 +40,17 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IPlugin
     /// <inheritdoc />
     public IEnumerable<PluginPageInfo> GetPages()
     {
-        yield return new PluginPageInfo
+        return new[]
         {
-            Name = Name,
-            EmbeddedResourcePath = string.Format(CultureInfo.InvariantCulture, "{0}.Configuration.configPage.html", GetType().Namespace)
+            new PluginPageInfo
+            {
+                Name = Name,
+                EmbeddedResourcePath = string.Format(CultureInfo.InvariantCulture, "{0}.Configuration.configPage.html",
+                    GetType().Namespace),
+                EnableInMainMenu = true
+            }
         };
+
     }
 
 

@@ -43,92 +43,93 @@
 </head>
 <body>
 
-<div id="TemplateConfigPage"
-     data-role="page"
-     class="page type-interior pluginConfigurationPage"
-     data-require="emby-input,emby-button,emby-select,emby-checkbox">
+<div data-role="page" class="page type-interior pluginConfigurationPage withTabs"
+     data-require="emby-button,emby-select,emby-checkbox"
+     data-controller="pluginMenu.js">
 
     <div data-role="content">
         <div class="content-primary">
             <form id="TemplateConfigForm">
-<h1>JellyFind</h1>
-<p>Entrez un mot-clé pour rechercher un torrent :</p>
-<input type="text" id="searchInput" placeholder="ex: The Matrix">
-<button onclick="search()">Rechercher</button>
+                <h1>JellyFind</h1>
+                <p>Entrez un mot-clé pour rechercher un torrent :</p>
+                <input type="text" id="searchInput" placeholder="ex: The Matrix">
+                <button type="button" id="searchButton">Rechercher</button>
 
-<div id="results"></div>
+                <div id="results"></div>
             </form>
         </div>
     </div>
-<script>
-    
-    
-    document.getElementById("TemplateConfigForm").addEventListener("submit", function (e) {
-        e.preventDefault();
-        search();
-    });
-    async function search() {
-        const query = document.getElementById("searchInput").value.trim();
-        const resultContainer = document.getElementById("results");
-        resultContainer.innerHTML = "";
-        
 
-        try {
-            const response = await fetch("https://jellyfind.local:8080/searchygg?q=" + encodeURIComponent(query));
-            const results = await response.json();
+    <script>
+        document.getElementById("TemplateConfigForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+            search();
+        });
 
-            if(response.status !== 200) {
-                resultContainer.innerHTML = "<p>" + response.status + "</p>";
+        document.getElementById("searchButton").addEventListener("click", function () {
+            search();
+        });
+
+        async function search() {
+            const query = document.getElementById("searchInput").value.trim();
+            const resultContainer = document.getElementById("results");
+            resultContainer.innerHTML = ""; // Réinitialiser les résultats
+
+            try {
+                const response = await fetch("https://jellyfind.local:8080/searchygg?q=" + encodeURIComponent(query));
+                const results = await response.json();
+
+                if (response.status !== 200) {
+                    resultContainer.innerHTML = "<p>Erreur avec le statut " + response.status + "</p>";
+                    return;
+                }
+
+                if (results.length === 0) {
+                    resultContainer.innerHTML = "<p>Aucun résultat trouvé.</p>";
+                    return;
+                }
+
+                results.forEach(item => {
+                    const div = document.createElement("div");
+                    div.className = "result";
+
+                    const title = document.createElement("strong");
+                    title.textContent = item.title;
+
+                    const size = document.createElement("p");
+                    size.textContent = "Taille : " + item.size;
+
+                    const seeders = document.createElement("p");
+                    seeders.textContent = "Seeders : " + item.seeders + " / Leechers : " + item.peers;
+
+                    const downloadButton = document.createElement("button");
+                    downloadButton.textContent = "Télécharger";
+                    downloadButton.addEventListener("click", () => download(item.url));
+
+                    div.appendChild(title);
+                    div.appendChild(size);
+                    div.appendChild(seeders);
+                    div.appendChild(downloadButton);
+
+                    resultContainer.appendChild(div);
+                });
+
+            } catch (err) {
+                resultContainer.innerHTML = "<p>Erreur lors de la recherche : " + err.message + "</p>";
             }
-            
-            if (!results.length) {
-                resultContainer.innerHTML = "<p>Aucun résultat.</p>";
-                return;
+        }
+
+        async function download(dlUrl) {
+            try {
+                const response = await fetch("https://jellyfind.local:8080/dl?dl=" + encodeURIComponent(dlUrl));
+                const text = await response.text();
+                alert("Téléchargement : " + text);
+            } catch (err) {
+                alert("Erreur de téléchargement : " + err.message);
             }
-
-
-
-            results.forEach(item => {
-                console.log(item);
-                const div = document.createElement("div");
-                div.className = "result";
-                
-                const title = document.createElement("strong");
-                title.textContent = item.title;
-
-                const size = document.createElement("p");
-                size.textContent = "Taille :" + item.size;
-
-                const seeders = document.createElement("p");
-                seeders.textContent = "Seeders : "+ item["seeders"] + " / Leechers : "+ item["peers"];
-
-                const downloadButton = document.createElement("button");
-                downloadButton.textContent = "Télécharger";
-                downloadButton.addEventListener("click", () => download(item.url));
-
-                div.appendChild(title);
-                div.appendChild(size);
-                div.appendChild(seeders);
-                div.appendChild(downloadButton);
-
-                resultContainer.appendChild(div);
-            });
-
-        } catch (err) {
-            resultContainer.textContent = "Erreur : " + err;
         }
-    }
-
-    async function download(dlUrl) {
-        try {
-            const response = await fetch("https://jellyfind.local:8080/dl?dl=" + encodeURIComponent(dlUrl));
-            const text = await response.text();
-            alert("Téléchargement : " + text);
-        } catch (err) {
-            alert("Erreur de téléchargement : " + err.message);
-        }
-    }
-</script>
+    </script>
 </div>
+
 </body>
 </html>

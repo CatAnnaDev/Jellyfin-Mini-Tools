@@ -47,7 +47,7 @@ pub async fn search_cpasbien(query: &str) -> Result<Vec<Torrent>, Box<dyn std::e
 
             let size = doc.select(&size_selector)
                 .next()
-                .and_then(|e| e.text().collect::<String>().parse::<f32>().ok());
+                .and_then(|e| Option::from(e.text().collect::<String>()));
 
             torrents.push(Torrent {
                 title,
@@ -108,8 +108,8 @@ pub fn build_headers() -> HeaderMap {
 
 async fn perform_login(client: &Client, cookie_store: Arc<Jar>) -> Result<(), reqwest::Error> {
     let login_form = Form::new()
-        .text("id", "")
-        .text("pass", "");
+        .text("id", "Psyko71")
+        .text("pass", "Asterix1928.");
 
     let response = client
         .post("https://www.yggtorrent.top/auth/process_login")

@@ -6,5 +6,5 @@ pub struct Torrent {
     pub url: String,
     pub seeders: Option<u32>,
     pub peers: Option<u32>,
-    pub size: Option<f32>,
+    pub size: Option<String>,
 }

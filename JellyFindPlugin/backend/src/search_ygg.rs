@@ -33,7 +33,7 @@ pub async fn parse_ygg(body: &str) -> Vec<Torrent> {
                     title: name,
                     url: format!("https://www.yggtorrent.top/engine/download_torrent?id={}", id),
                     seeders: Some(tds[7].text().collect::<Vec<_>>().join("").trim().to_string().parse().unwrap()),
-                    size: Some(tds[5].text().collect::<Vec<_>>().join("").trim().to_string().replace("Go", "").parse().unwrap()),
+                    size: Some(tds[5].text().collect::<Vec<_>>().join("").trim().to_string()),
                     peers: Some(tds[8].text().collect::<Vec<_>>().join("").trim().to_string().parse().unwrap()),
                 });
             }
